@@ -3,24 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Content.Models.Components;
 
 namespace Content.Controllers
 {
     [Route("api/[controller]")]
-    public class ValuesController : Controller
+    public class SchemaController : Controller
     {
-        // GET api/values
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly ComponentRepository _repo;
+
+        public SchemaController(ComponentRepository repo)
         {
-            return new string[] { "value1", "value2" };
+            _repo = repo;            
+        }
+
+        [HttpGet]
+        public ActionResult Get()
+        {
+           return Ok(_repo.Components.ToDictionary(v => v.Value.ComponentType, v => v.Value));                
         }
 
         // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{id:guid}")]
+        public ActionResult Get(Guid id)
         {
-            return "value";
+            if (_repo.Components.ContainsKey(id))
+                return Ok(_repo.Components[id]);
+
+            return NotFound();
         }
 
         // POST api/values
